@@ -47,8 +47,8 @@ public class GuildDataService {
     }
 
     @GraphQLQuery
-    public long ownerId(@GraphQLContext GuildData guildData) {
-        return getGuildFromId(guildData.getGuildId()).getOwnerIdLong();
+    public String ownerId(@GraphQLContext GuildData guildData) {
+        return getGuildFromId(guildData.getGuildId()).getOwnerId();
     }
 
     @GraphQLQuery
@@ -72,6 +72,11 @@ public class GuildDataService {
     @GraphQLQuery
     public int memberCount(@GraphQLContext GuildData guildData) {
         return getGuildFromId(guildData.getGuildId()).getMembers().size();
+    }
+
+    @GraphQLQuery
+    public String guildId(@GraphQLContext GuildData guildData) {
+        return String.valueOf(guildData.getGuildId());
     }
 
     @GraphQLQuery

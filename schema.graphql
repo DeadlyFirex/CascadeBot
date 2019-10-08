@@ -43,8 +43,8 @@ type GuildData {
   splashUrl: String!
   memberCount: Int!
   locale: Locale!
-  ownerId: Long!
-  guildId: Long!
+  ownerId: String!
+  guildId: String!
   coreSettings: GuildSettingsCore!
   stateLock: UUID!
   dbCreationTime: OffsetDateTime!
