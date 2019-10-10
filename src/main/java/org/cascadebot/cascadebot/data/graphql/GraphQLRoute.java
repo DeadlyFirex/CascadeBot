@@ -37,7 +37,11 @@ public class GraphQLRoute implements Route {
         boolean authenticated;
 
         boolean authHeaderPresent = !StringUtils.isEmpty(request.headers("Authorization"));
-        Claims claims = Config.INS.getAuth().verify(request.headers("Authorization"));
+        Claims claims = null;
+
+        if (authHeaderPresent) {
+            claims = Config.INS.getAuth().verify(request.headers("Authorization"));
+        }
 
         boolean jwtMatches = claims != null;
 
