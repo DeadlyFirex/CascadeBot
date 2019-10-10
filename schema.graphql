@@ -1,5 +1,5 @@
 # source: http://localhost:8080/graphql
-# timestamp: Thu Sep 12 2019 21:41:16 GMT+0100 (British Summer Time)
+# timestamp: Thu Oct 10 2019 21:43:48 GMT+0100 (British Summer Time)
 
 type CascadePermission {
   defaultPerm: Boolean!
@@ -43,8 +43,8 @@ type GuildData {
   splashUrl: String!
   memberCount: Int!
   locale: Locale!
-  ownerId: String!
-  guildId: String!
+  ownerId: String
+  guildId: String
   coreSettings: GuildSettingsCore!
   stateLock: UUID!
   dbCreationTime: OffsetDateTime!
@@ -69,16 +69,18 @@ input GuildPermissionsInput {
 }
 
 type GuildSettingsCore {
-  deleteCommand: Boolean!
-  showPermErrors: Boolean!
   adminsHaveAllPerms: Boolean!
   prefix: String
-  enabledModules: [Module]
-  mentionPrefix: Boolean!
-  allowTagCommands: Boolean!
+  helpShowAllModules: Boolean!
   useEmbedForMessages: Boolean!
   showModuleErrors: Boolean!
   tags: Map_String_TagScalar
+  deleteCommand: Boolean!
+  showPermErrors: Boolean!
+  helpHideCommandsNoPermission: Boolean!
+  enabledModules: [Module]
+  mentionPrefix: Boolean!
+  allowTagCommands: Boolean!
 }
 
 type ICommandMain {
@@ -134,15 +136,20 @@ enum Module {
 
 """Mutation root"""
 type Mutation {
-  updateGuildPermissions(changes: GuildPermissionsInput!, guildId: Long!): GuildPermissions
   setGuildLocale(locale: Locale!, guildId: Long!): GuildData
+  updateGuildPermissions(changes: GuildPermissionsInput!, guildId: Long!): GuildPermissions
 
   """Edits any fields on a playlist. Null fields are skipped."""
   editPlaylist(name: String, id: String!, ownerId: Long, playlistScope: PlaylistScope, tracks: [String]): Playlist
-  deletePlaylist(id: String!): String
+  setPrefix(prefix: String, guildId: Long!): String
   userHasPermission(permission: String, userId: Long!, guildId: Long!): Result
+  deletePlaylist(id: String!): String
+  disableModule(module: Module, guildId: Long!): [Module]
+  removeTags(guildId: Long!, tags: [String]): Map_String_TagScalar
+  enableModule(module: Module, guildId: Long!): [Module]
   createPlaylist(scope: PlaylistScope!, name: String!, ownerId: Long!, tracks: [String]!): Playlist
   updateCoreSettings(newSettings: Map_String_ObjectScalar!, guildId: Long!): GuildSettingsCore
+  updateTags(guildId: Long!, tags: Map_String_TagScalar): Map_String_TagScalar
 }
 
 """Built-in scalar representing a date-time with a UTC offset"""
