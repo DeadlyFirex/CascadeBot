@@ -16,6 +16,7 @@ import org.cascadebot.cascadebot.data.objects.Tag;
 import org.cascadebot.cascadebot.utils.ReflectionUtils;
 import org.cascadebot.cascadebot.utils.SettingsUtils;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -92,14 +93,27 @@ public class SettingsService {
     public GuildSettingsCore updateCoreSettings(@GraphQLRootContext QLContext context, long guildId, @GraphQLNonNull Map<String, Object> newSettings) {
         return context.runIfAuthenticatedGuild(guildId, (guild, member) -> {
             try {
-                GuildSettingsCore newCoreSettings = ReflectionUtils.assignMapToObject(context.getGuildData(guildId).getCoreSettings(), newSettings, true);
-                context.getGuildData(guildId).setCoreSettings(newCoreSettings);
-                return newCoreSettings;
+                GuildSettingsCore coreSettings = context.getGuildData(guildId).getCoreSettings();
+                for (String key : newSettings.keySet()) {
+                    try {
+                        Field field = GuildSettingsCore.class.getDeclaredField(key);
+                        if (field.getAnnotation(Setting.class) != null) {
+                            Setting setting = field.getAnnotation(Setting.class);
+                            if (setting.directlyEditable()) {
+                                field.setAccessible(true);
+                                field.set(coreSettings, newSettings.get(key));
+                            } else {
+                                throw new RuntimeException(String.format("You are trying to modify the setting \"%s\" which isn't directly editable!", key));
+                            }
+                        }
+                    } catch (NoSuchFieldException ignored) {
+
+                    }
+                }
+                return coreSettings;
             } catch (IllegalAccessException e) {
                 // Rethrow this to be shown to graphql
                 throw new RuntimeException(e);
-            } catch (NoSuchFieldException e) {
-                return null;
             }
         });
     }
