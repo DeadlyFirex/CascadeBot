@@ -7,6 +7,7 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.cascadebot.cascadebot.commandmeta.Module;
 import org.cascadebot.cascadebot.data.graphql.objects.QLContext;
 import org.cascadebot.cascadebot.data.graphql.objects.SettingsWrapper;
@@ -56,11 +57,15 @@ public class SettingsService {
         });
     }
 
-    @GraphQLMutation(description = "Updates tags using the key-value object. If the tag doesn't exist, it is created. This overwrites existing tags completely ignore past values.")
+    @GraphQLMutation(description = "Updates tags using the key-value object. If the tag doesn't exist, it is created. If a name is empty, it is not added and silently ignored. This overwrites existing tags completely ignore past values.")
     public Map<String, Tag> updateTags(@GraphQLRootContext QLContext context, long guildId, @GraphQLNonNull Map<String, Tag> tags) {
         return context.runIfAuthenticatedGuild(guildId, (guild, member) -> {
             GuildSettingsCore coreSettings = context.getGuildData(guildId).getCoreSettings();
-            tags.forEach(coreSettings::addTag);
+            tags.forEach((name, tag) -> {
+                if (!StringUtils.isBlank(name)) {
+                    coreSettings.addTag(name, tag);
+                }
+            });
             return coreSettings.getTags();
         });
     }
@@ -77,6 +82,10 @@ public class SettingsService {
     @GraphQLMutation
     public String setPrefix(@GraphQLRootContext QLContext context, long guildId, @GraphQLNonNull String prefix) {
         return context.runIfAuthenticatedGuild(guildId, (guild, member) -> {
+            // TODO: 11/10/2019 Check prefix length and just ignore extra input (Substring to max)
+            if (prefix.isEmpty()) {
+                throw new RuntimeException("You didn't provide a prefix :(");
+            }
             char[] chars = prefix.toCharArray();
             for (int i = 0; i < chars.length; i++) {
                 if (i == 0) {
