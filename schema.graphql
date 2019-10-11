@@ -1,5 +1,5 @@
 # source: http://localhost:8080/graphql
-# timestamp: Thu Oct 10 2019 21:43:48 GMT+0100 (British Summer Time)
+# timestamp: Fri Oct 11 2019 16:21:09 GMT+0100 (British Summer Time)
 
 type CascadePermission {
   defaultPerm: Boolean!
@@ -22,10 +22,10 @@ type Group {
 }
 
 input GroupInput {
-  id: String
-  permissions: [String]
   name: String
   roleIds: [Long]
+  id: String
+  permissions: [String]
 }
 
 type GuildCommandInfo {
@@ -49,8 +49,8 @@ type GuildData {
   stateLock: UUID!
   dbCreationTime: OffsetDateTime!
   permissions: GuildPermissions!
-  voiceChannelCount: Int!
   categoryCount: Int!
+  voiceChannelCount: Int!
   name: String!
   iconUrl: String!
   textChannelCount: Int!
@@ -63,9 +63,9 @@ type GuildPermissions {
 }
 
 input GuildPermissionsInput {
-  mode: PermissionMode
   groups: [GroupInput]
   users: Map_Long_UserScalar
+  mode: PermissionMode
 }
 
 type GuildSettingsCore {
@@ -136,20 +136,35 @@ enum Module {
 
 """Mutation root"""
 type Mutation {
-  setGuildLocale(locale: Locale!, guildId: Long!): GuildData
   updateGuildPermissions(changes: GuildPermissionsInput!, guildId: Long!): GuildPermissions
+  setGuildLocale(locale: Locale!, guildId: Long!): GuildData
 
   """Edits any fields on a playlist. Null fields are skipped."""
   editPlaylist(name: String, id: String!, ownerId: Long, playlistScope: PlaylistScope, tracks: [String]): Playlist
-  setPrefix(prefix: String, guildId: Long!): String
-  userHasPermission(permission: String, userId: Long!, guildId: Long!): Result
   deletePlaylist(id: String!): String
-  disableModule(module: Module, guildId: Long!): [Module]
-  removeTags(guildId: Long!, tags: [String]): Map_String_TagScalar
-  enableModule(module: Module, guildId: Long!): [Module]
+  userHasPermission(permission: String, userId: Long!, guildId: Long!): Result
+  setPrefix(prefix: String!, guildId: Long!): String
+
+  """Disables all modules passed in."""
+  disableModule(guildId: Long!, modules: [Module]!): [Module]
+
+  """
+  Removes tags based on the list of keys. If invalid keys are passed in, this mutation silently ignores them.
+  """
+  removeTags(guildId: Long!, tags: [String]!): Map_String_TagScalar
+
+  """
+  Enables all the modules passed in. Any duplicate enable modules are eliminated due to being stored in a set.
+  """
+  enableModule(guildId: Long!, modules: [Module]!): [Module]
   createPlaylist(scope: PlaylistScope!, name: String!, ownerId: Long!, tracks: [String]!): Playlist
   updateCoreSettings(newSettings: Map_String_ObjectScalar!, guildId: Long!): GuildSettingsCore
-  updateTags(guildId: Long!, tags: Map_String_TagScalar): Map_String_TagScalar
+
+  """
+  Updates tags using the key-value object. If the tag doesn't exist, it is
+  created. This overwrites existing tags completely ignore past values.
+  """
+  updateTags(guildId: Long!, tags: Map_String_TagScalar!): Map_String_TagScalar
 }
 
 """Built-in scalar representing a date-time with a UTC offset"""
@@ -217,9 +232,15 @@ enum PlaylistScope {
 """Query root"""
 type Query {
   allPlaylists(scope: PlaylistScope!, ownerId: Long!): [Playlist]!
-  language(languageKey: String!): JSONObject
   permission(permission: String!): CascadePermission
-  settingsInformation: [SettingsWrapper]
+  language(languageKey: String!): JSONObject
+
+  """
+  Returns all the meta-data for settings including required Flags, modules and
+  whether it is directly editable. The list of settings names will filter the
+  list returned. If the list is null, all the settings' meta-data is returned.
+  """
+  settingsInformation(settingsNames: [String]): [SettingsWrapper]
   guild(id: Long!): GuildData
   playlist(id: String!, guildId: Long!): Playlist
   allCommands(module: Module): [ICommandMain]!
