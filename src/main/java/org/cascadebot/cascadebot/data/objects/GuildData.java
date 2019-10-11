@@ -10,7 +10,6 @@ import de.bild.codec.annotations.Id;
 import de.bild.codec.annotations.PreSave;
 import de.bild.codec.annotations.Transient;
 import io.leangen.graphql.annotations.GraphQLIgnore;
-import io.leangen.graphql.annotations.GraphQLNonNull;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -28,6 +27,7 @@ import org.cascadebot.cascadebot.utils.buttons.ButtonGroup;
 import org.cascadebot.cascadebot.utils.buttons.ButtonsCache;
 import org.cascadebot.cascadebot.utils.pagination.PageCache;
 
+import javax.annotation.Nonnull;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
@@ -45,31 +45,31 @@ public class GuildData {
     private long guildId;
 
     //region Meta information
-    @GraphQLNonNull
+    @Nonnull
     private UUID stateLock = UUID.randomUUID(); // This is for checking state between the wrapper, bot and panel
 
-    @GraphQLNonNull
+    @Nonnull
     private OffsetDateTime dbCreationTime = OffsetDateTime.now();
     //endregion
 
     @GraphQLIgnore
     private ConcurrentHashMap<Class<? extends ICommandMain>, GuildCommandInfo> commandInfo = new ConcurrentHashMap<>();
 
-    @GraphQLNonNull
+    @Nonnull
     private Set<Flag> enabledFlags = Sets.newConcurrentHashSet();
 
-    @GraphQLNonNull
+    @Nonnull
     @Setter
     private Locale locale = Locale.getDefaultLocale();
 
     //region Guild data containers
 
-    @GraphQLNonNull
+    @Nonnull
     @Setter
     private GuildSettingsCore coreSettings = new GuildSettingsCore(guildId);
 
     @GraphQLQuery(name = "permissions")
-    @GraphQLNonNull
+    @Nonnull
     @Setter
     private GuildPermissions guildPermissions = new GuildPermissions();
     /*

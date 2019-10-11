@@ -1,10 +1,7 @@
 package org.cascadebot.cascadebot.data.graphql.services;
 
-import graphql.ExceptionWhileDataFetching;
-import graphql.GraphQLException;
 import io.leangen.graphql.annotations.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLMutation;
-import io.leangen.graphql.annotations.GraphQLNonNull;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import lombok.AccessLevel;
@@ -18,6 +15,7 @@ import org.cascadebot.cascadebot.data.managers.PlaylistManager;
 import org.cascadebot.cascadebot.data.objects.Playlist;
 import org.cascadebot.cascadebot.data.objects.PlaylistScope;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -29,7 +27,7 @@ public class PlaylistService {
     private static PlaylistService instance = new PlaylistService();
 
     @GraphQLQuery
-    public Playlist playlist(@GraphQLRootContext QLContext context, long guildId, @GraphQLNonNull String id) {
+    public Playlist playlist(@GraphQLRootContext QLContext context, long guildId, @Nonnull String id) {
         Playlist playlist = PlaylistManager.getPlaylistById(id);
         if (playlist == null) return null;
         // Check that the user is authenticated to get the playlist
@@ -41,8 +39,8 @@ public class PlaylistService {
     }
 
     @GraphQLQuery
-    @GraphQLNonNull
-    public List<Playlist> allPlaylists(@GraphQLRootContext QLContext context, long ownerId, @GraphQLNonNull PlaylistScope scope) {
+    @Nonnull
+    public List<Playlist> allPlaylists(@GraphQLRootContext QLContext context, long ownerId, @Nonnull PlaylistScope scope) {
         Supplier<List<Playlist>> playlistSupplier = () -> PlaylistManager.getPlaylists(ownerId, scope).into(new ArrayList<>());
         if (scope == PlaylistScope.GUILD) {
             return context.runIfAuthenticatedUser(user -> {
@@ -59,13 +57,13 @@ public class PlaylistService {
     }
 
     @GraphQLQuery
-    @GraphQLNonNull
+    @Nonnull
     public String id(@GraphQLContext Playlist playlist) {
         return playlist.getPlaylistId().toHexString();
     }
 
     @GraphQLMutation
-    public Playlist createPlaylist(@GraphQLRootContext QLContext context, @GraphQLNonNull String name, @GraphQLNonNull List<String> tracks, long ownerId, @GraphQLNonNull PlaylistScope scope) {
+    public Playlist createPlaylist(@GraphQLRootContext QLContext context, @Nonnull String name, @Nonnull List<String> tracks, long ownerId, @Nonnull PlaylistScope scope) {
         Supplier<Playlist> playlistSupplier = () -> {
             Checks.notBlank(name, "name");
             Checks.notEmpty(tracks, "tracks");
@@ -107,7 +105,7 @@ public class PlaylistService {
     }
 
     @GraphQLMutation
-    public String deletePlaylist(@GraphQLRootContext QLContext context, @GraphQLNonNull String id) {
+    public String deletePlaylist(@GraphQLRootContext QLContext context, @Nonnull String id) {
         Playlist playlist = PlaylistManager.getPlaylistById(id);
         if (playlist == null) {
             throw new IllegalStateException("There is no playlist by that ID to delete!");
@@ -123,7 +121,7 @@ public class PlaylistService {
     }
 
     @GraphQLMutation(description = "Edits any fields on a playlist. Null fields are skipped.")
-    public Playlist editPlaylist(@GraphQLRootContext QLContext context, @GraphQLNonNull String id, String name, List<String> tracks, Long ownerId, PlaylistScope playlistScope) {
+    public Playlist editPlaylist(@GraphQLRootContext QLContext context, @Nonnull String id, String name, List<String> tracks, Long ownerId, PlaylistScope playlistScope) {
         Playlist playlist = PlaylistManager.getPlaylistById(id);
         if (playlist == null) {
             throw new IllegalStateException("There is no playlist by that ID to edit! please create one instead!");

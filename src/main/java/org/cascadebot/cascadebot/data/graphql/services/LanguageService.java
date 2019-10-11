@@ -2,7 +2,6 @@ package org.cascadebot.cascadebot.data.graphql.services;
 
 import com.google.gson.JsonObject;
 import io.github.binaryoverload.JSONConfig;
-import io.leangen.graphql.annotations.GraphQLNonNull;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -10,6 +9,7 @@ import lombok.NoArgsConstructor;
 import org.cascadebot.cascadebot.data.language.Language;
 import org.cascadebot.cascadebot.data.language.Locale;
 
+import javax.annotation.Nonnull;
 import java.util.Arrays;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -19,7 +19,7 @@ public class LanguageService {
     private static LanguageService instance = new LanguageService();
 
     @GraphQLQuery
-    public JsonObject language(@GraphQLNonNull String languageKey) {
+    public JsonObject language(@Nonnull String languageKey) {
         Locale locale = Arrays.stream(Locale.values())
                 .filter(locale1 -> locale1.getLanguageCode().equalsIgnoreCase(languageKey))
                 .findFirst()

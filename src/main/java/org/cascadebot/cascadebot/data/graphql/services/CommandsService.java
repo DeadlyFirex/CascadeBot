@@ -1,6 +1,5 @@
 package org.cascadebot.cascadebot.data.graphql.services;
 
-import io.leangen.graphql.annotations.GraphQLNonNull;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -9,6 +8,7 @@ import org.cascadebot.cascadebot.CascadeBot;
 import org.cascadebot.cascadebot.commandmeta.ICommandMain;
 import org.cascadebot.cascadebot.commandmeta.Module;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -18,7 +18,7 @@ public class CommandsService {
     private static CommandsService instance = new CommandsService();
 
     @GraphQLQuery
-    @GraphQLNonNull
+    @Nonnull
     public List<ICommandMain> allCommands(Module module) {
         if (module == null) {
             return CascadeBot.INS.getCommandManager().getCommands();

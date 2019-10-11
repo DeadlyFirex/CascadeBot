@@ -1,7 +1,6 @@
 package org.cascadebot.cascadebot.data.graphql.services;
 
 import io.leangen.graphql.annotations.GraphQLMutation;
-import io.leangen.graphql.annotations.GraphQLNonNull;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import lombok.AccessLevel;
@@ -14,9 +13,9 @@ import org.cascadebot.cascadebot.data.graphql.objects.SettingsWrapper;
 import org.cascadebot.cascadebot.data.objects.GuildSettingsCore;
 import org.cascadebot.cascadebot.data.objects.Setting;
 import org.cascadebot.cascadebot.data.objects.Tag;
-import org.cascadebot.cascadebot.utils.ReflectionUtils;
 import org.cascadebot.cascadebot.utils.SettingsUtils;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +39,7 @@ public class SettingsService {
     }
 
     @GraphQLMutation(description = "Enables all the modules passed in. Any duplicate enable modules are eliminated due to being stored in a set.")
-    public Set<Module> enableModule(@GraphQLRootContext QLContext context, long guildId, @GraphQLNonNull List<Module> modules) {
+    public Set<Module> enableModule(@GraphQLRootContext QLContext context, long guildId, @Nonnull List<Module> modules) {
         return context.runIfAuthenticatedGuild(guildId, (guild, member) -> {
             GuildSettingsCore coreSettings = context.getGuildData(guildId).getCoreSettings();
             modules.forEach(coreSettings::enableModule);
@@ -49,7 +48,7 @@ public class SettingsService {
     }
 
     @GraphQLMutation(description = "Disables all modules passed in.")
-    public Set<Module> disableModule(@GraphQLRootContext QLContext context, long guildId, @GraphQLNonNull List<Module> modules) {
+    public Set<Module> disableModule(@GraphQLRootContext QLContext context, long guildId, @Nonnull List<Module> modules) {
         return context.runIfAuthenticatedGuild(guildId, (guild, member) -> {
             GuildSettingsCore coreSettings = context.getGuildData(guildId).getCoreSettings();
             modules.forEach(coreSettings::disableModule);
@@ -58,7 +57,7 @@ public class SettingsService {
     }
 
     @GraphQLMutation(description = "Updates tags using the key-value object. If the tag doesn't exist, it is created. If a name is empty, it is not added and silently ignored. This overwrites existing tags completely ignore past values.")
-    public Map<String, Tag> updateTags(@GraphQLRootContext QLContext context, long guildId, @GraphQLNonNull Map<String, Tag> tags) {
+    public Map<String, Tag> updateTags(@GraphQLRootContext QLContext context, long guildId, @Nonnull Map<String, Tag> tags) {
         return context.runIfAuthenticatedGuild(guildId, (guild, member) -> {
             GuildSettingsCore coreSettings = context.getGuildData(guildId).getCoreSettings();
             tags.forEach((name, tag) -> {
@@ -71,7 +70,7 @@ public class SettingsService {
     }
 
     @GraphQLMutation(description = "Removes tags based on the list of keys. If invalid keys are passed in, this mutation silently ignores them.")
-    public Map<String, Tag> removeTags(@GraphQLRootContext QLContext context, long guildId, @GraphQLNonNull Set<String> tags) {
+    public Map<String, Tag> removeTags(@GraphQLRootContext QLContext context, long guildId, @Nonnull Set<String> tags) {
         return context.runIfAuthenticatedGuild(guildId, (guild, member) -> {
             GuildSettingsCore coreSettings = context.getGuildData(guildId).getCoreSettings();
             tags.forEach(coreSettings::removeTag);
@@ -80,7 +79,7 @@ public class SettingsService {
     }
 
     @GraphQLMutation
-    public String setPrefix(@GraphQLRootContext QLContext context, long guildId, @GraphQLNonNull String prefix) {
+    public String setPrefix(@GraphQLRootContext QLContext context, long guildId, @Nonnull String prefix) {
         return context.runIfAuthenticatedGuild(guildId, (guild, member) -> {
             // TODO: 11/10/2019 Check prefix length and just ignore extra input (Substring to max)
             if (prefix.isEmpty()) {
@@ -100,7 +99,7 @@ public class SettingsService {
     }
 
     @GraphQLMutation
-    public GuildSettingsCore updateCoreSettings(@GraphQLRootContext QLContext context, long guildId, @GraphQLNonNull Map<String, Object> newSettings) {
+    public GuildSettingsCore updateCoreSettings(@GraphQLRootContext QLContext context, long guildId, @Nonnull Map<String, Object> newSettings) {
         return context.runIfAuthenticatedGuild(guildId, (guild, member) -> {
             try {
                 GuildSettingsCore coreSettings = context.getGuildData(guildId).getCoreSettings();

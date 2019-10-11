@@ -1,7 +1,6 @@
 package org.cascadebot.cascadebot.data.graphql.services;
 
 import io.leangen.graphql.annotations.GraphQLMutation;
-import io.leangen.graphql.annotations.GraphQLNonNull;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import lombok.AccessLevel;
@@ -16,6 +15,7 @@ import org.cascadebot.cascadebot.permissions.CascadePermission;
 import org.cascadebot.cascadebot.permissions.objects.Result;
 import org.cascadebot.cascadebot.utils.ReflectionUtils;
 
+import javax.annotation.Nonnull;
 import java.util.Set;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -30,7 +30,7 @@ public class PermissionsServices {
     }
 
     @GraphQLQuery
-    public CascadePermission permission(@GraphQLNonNull String permission) {
+    public CascadePermission permission(@Nonnull String permission) {
         return CascadeBot.INS.getPermissionsManager().getPermission(permission);
     }
 
@@ -50,7 +50,7 @@ public class PermissionsServices {
     }
 
     @GraphQLMutation
-    public GuildPermissions updateGuildPermissions(@GraphQLRootContext QLContext context, long guildId, @GraphQLNonNull GuildPermissions changes) {
+    public GuildPermissions updateGuildPermissions(@GraphQLRootContext QLContext context, long guildId, @Nonnull GuildPermissions changes) {
         return context.runIfAuthenticatedGuild(guildId, (guild, member) -> {
             try {
                 GuildPermissions permissions = ReflectionUtils.partiallyUpdateObject(context.getGuildData(guildId).getPermissions(), changes);

@@ -2,7 +2,6 @@ package org.cascadebot.cascadebot.data.graphql.services;
 
 import io.leangen.graphql.annotations.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLMutation;
-import io.leangen.graphql.annotations.GraphQLNonNull;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import lombok.AccessLevel;
@@ -16,6 +15,8 @@ import org.cascadebot.cascadebot.data.language.Locale;
 import org.cascadebot.cascadebot.data.managers.GuildDataManager;
 import org.cascadebot.cascadebot.data.objects.GuildData;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,19 +53,19 @@ public class GuildDataService {
     }
 
     @GraphQLQuery
-    @GraphQLNonNull
+    @Nonnull
     public String name(@GraphQLContext GuildData guildData) {
         return getGuildFromId(guildData.getGuildId()).getName();
     }
 
     @GraphQLQuery
-    @GraphQLNonNull
+    @Nullable
     public String iconUrl(@GraphQLContext GuildData guildData) {
         return getGuildFromId(guildData.getGuildId()).getIconUrl();
     }
 
     @GraphQLQuery
-    @GraphQLNonNull
+    @Nullable
     public String splashUrl(@GraphQLContext GuildData guildData) {
         return getGuildFromId(guildData.getGuildId()).getSplashUrl();
     }
@@ -95,7 +96,7 @@ public class GuildDataService {
     }
 
     @GraphQLQuery
-    @GraphQLNonNull
+    @Nonnull
     public OffsetDateTime creationTime(@GraphQLContext GuildData guildData) {
         return getGuildFromId(guildData.getGuildId()).getTimeCreated();
     }
@@ -109,7 +110,7 @@ public class GuildDataService {
     }
 
     @GraphQLMutation
-    public GuildData setGuildLocale(@GraphQLRootContext QLContext context, long guildId, @GraphQLNonNull Locale locale) {
+    public GuildData setGuildLocale(@GraphQLRootContext QLContext context, long guildId, @Nonnull Locale locale) {
         return context.runIfAuthenticatedGuild(guildId, (guild, member) -> {
             GuildData guildData = context.getGuildData(guildId);
             guildData.setLocale(locale);
