@@ -38,19 +38,19 @@ public class SettingsService {
     }
 
     @GraphQLMutation
-    public Set<Module> enableModule(@GraphQLRootContext QLContext context, long guildId, Module module) {
+    public Set<Module> enableModule(@GraphQLRootContext QLContext context, long guildId, List<Module> modules) {
         return context.runIfAuthenticatedGuild(guildId, (guild, member) -> {
             GuildSettingsCore coreSettings = context.getGuildData(guildId).getCoreSettings();
-            coreSettings.enableModule(module);
+            modules.forEach(coreSettings::enableModule);
             return coreSettings.getEnabledModules();
         });
     }
 
     @GraphQLMutation
-    public Set<Module> disableModule(@GraphQLRootContext QLContext context, long guildId, Module module) {
+    public Set<Module> disableModule(@GraphQLRootContext QLContext context, long guildId, List<Module> modules) {
         return context.runIfAuthenticatedGuild(guildId, (guild, member) -> {
             GuildSettingsCore coreSettings = context.getGuildData(guildId).getCoreSettings();
-            coreSettings.disableModule(module);
+            modules.forEach(coreSettings::disableModule);
             return coreSettings.getEnabledModules();
         });
     }
