@@ -28,17 +28,18 @@ public class SettingsService {
     @Getter
     private static SettingsService instance = new SettingsService();
 
-    @GraphQLQuery
-    public List<SettingsWrapper> settingsInformation() {
+    @GraphQLQuery(description = "Returns all the meta-data for settings including required Flags, modules and whether it is directly editable. The list of settings names will filter the list returned. If the list is null, all the settings' meta-data is returned.")
+    public List<SettingsWrapper> settingsInformation(List<String> settingsNames) {
         return SettingsUtils.getAllSettings()
                 .values()
                 .stream()
+                .filter(field -> settingsNames == null || settingsNames.contains(field.getName()))
                 .map(field -> SettingsWrapper.from(field, field.getAnnotation(Setting.class)))
                 .collect(Collectors.toList());
     }
 
-    @GraphQLMutation
-    public Set<Module> enableModule(@GraphQLRootContext QLContext context, long guildId, List<Module> modules) {
+    @GraphQLMutation(description = "Enables all the modules passed in. Any duplicate enable modules are eliminated due to being stored in a set.")
+    public Set<Module> enableModule(@GraphQLRootContext QLContext context, long guildId, @GraphQLNonNull List<Module> modules) {
         return context.runIfAuthenticatedGuild(guildId, (guild, member) -> {
             GuildSettingsCore coreSettings = context.getGuildData(guildId).getCoreSettings();
             modules.forEach(coreSettings::enableModule);
@@ -46,8 +47,8 @@ public class SettingsService {
         });
     }
 
-    @GraphQLMutation
-    public Set<Module> disableModule(@GraphQLRootContext QLContext context, long guildId, List<Module> modules) {
+    @GraphQLMutation(description = "Disables all modules passed in.")
+    public Set<Module> disableModule(@GraphQLRootContext QLContext context, long guildId, @GraphQLNonNull List<Module> modules) {
         return context.runIfAuthenticatedGuild(guildId, (guild, member) -> {
             GuildSettingsCore coreSettings = context.getGuildData(guildId).getCoreSettings();
             modules.forEach(coreSettings::disableModule);
@@ -55,8 +56,8 @@ public class SettingsService {
         });
     }
 
-    @GraphQLMutation
-    public Map<String, Tag> updateTags(@GraphQLRootContext QLContext context, long guildId, Map<String, Tag> tags) {
+    @GraphQLMutation(description = "Updates tags using the key-value object. If the tag doesn't exist, it is created. This overwrites existing tags completely ignore past values.")
+    public Map<String, Tag> updateTags(@GraphQLRootContext QLContext context, long guildId, @GraphQLNonNull Map<String, Tag> tags) {
         return context.runIfAuthenticatedGuild(guildId, (guild, member) -> {
             GuildSettingsCore coreSettings = context.getGuildData(guildId).getCoreSettings();
             tags.forEach(coreSettings::addTag);
@@ -64,8 +65,8 @@ public class SettingsService {
         });
     }
 
-    @GraphQLMutation
-    public Map<String, Tag> removeTags(@GraphQLRootContext QLContext context, long guildId, Set<String> tags) {
+    @GraphQLMutation(description = "Removes tags based on the list of keys. If invalid keys are passed in, this mutation silently ignores them.")
+    public Map<String, Tag> removeTags(@GraphQLRootContext QLContext context, long guildId, @GraphQLNonNull Set<String> tags) {
         return context.runIfAuthenticatedGuild(guildId, (guild, member) -> {
             GuildSettingsCore coreSettings = context.getGuildData(guildId).getCoreSettings();
             tags.forEach(coreSettings::removeTag);
@@ -74,7 +75,7 @@ public class SettingsService {
     }
 
     @GraphQLMutation
-    public String setPrefix(@GraphQLRootContext QLContext context, long guildId, String prefix) {
+    public String setPrefix(@GraphQLRootContext QLContext context, long guildId, @GraphQLNonNull String prefix) {
         return context.runIfAuthenticatedGuild(guildId, (guild, member) -> {
             char[] chars = prefix.toCharArray();
             for (int i = 0; i < chars.length; i++) {
