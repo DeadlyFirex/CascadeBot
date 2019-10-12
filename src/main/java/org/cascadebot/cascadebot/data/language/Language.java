@@ -11,6 +11,7 @@ import net.dv8tion.jda.internal.utils.Checks;
 import org.apache.commons.lang3.ArrayUtils;
 import org.cascadebot.cascadebot.CascadeBot;
 import org.cascadebot.cascadebot.ShutdownHandler;
+import org.cascadebot.cascadebot.data.Config;
 import org.cascadebot.cascadebot.data.managers.GuildDataManager;
 import org.cascadebot.cascadebot.utils.FormatUtils;
 import org.slf4j.Logger;
@@ -35,6 +36,7 @@ public class Language {
             ShutdownHandler.exitWithError();
         }
         LOGGER.info("Loaded {} languages!", languages.size());
+        Config.INS.getEventWebhook().send("\uD83D\uDD21 Loaded **" + languages.size() + "** languages!");
     }
 
     private void loadLanguage(Locale locale) {

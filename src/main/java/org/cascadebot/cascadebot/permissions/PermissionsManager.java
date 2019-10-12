@@ -15,6 +15,7 @@ import org.cascadebot.cascadebot.commandmeta.ICommandExecutable;
 import org.cascadebot.cascadebot.commandmeta.ICommandMain;
 import org.cascadebot.cascadebot.commandmeta.ICommandRestricted;
 import org.cascadebot.cascadebot.commandmeta.Module;
+import org.cascadebot.cascadebot.data.Config;
 import org.cascadebot.cascadebot.data.language.Language;
 import org.cascadebot.cascadebot.data.language.Locale;
 import org.cascadebot.cascadebot.data.objects.GuildData;
@@ -81,6 +82,7 @@ public class PermissionsManager {
         registerPermission(CascadePermission.of("queue.save.overwrite", false));
 
         LOGGER.info("{} permissions loaded in {}ms!", permissions.size(), System.currentTimeMillis() - startTime);
+        Config.INS.getEventWebhook().send("\uD83D\uDD12 Loaded **" + permissions.size() + "** permissions!");
 
         defaultPermissions = permissions.values()
                 .stream()

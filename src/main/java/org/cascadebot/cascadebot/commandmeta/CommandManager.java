@@ -8,6 +8,7 @@ package org.cascadebot.cascadebot.commandmeta;
 import lombok.Getter;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.cascadebot.cascadebot.ShutdownHandler;
+import org.cascadebot.cascadebot.data.Config;
 import org.cascadebot.cascadebot.data.language.Locale;
 import org.cascadebot.cascadebot.data.objects.GuildData;
 import org.cascadebot.cascadebot.utils.ReflectionUtils;
@@ -39,6 +40,7 @@ public class CommandManager {
                 }
             }
             LOGGER.info("Loaded {} commands in {}ms.", commands.size(), (System.currentTimeMillis() - start));
+            Config.INS.getEventWebhook().send("\uD83D\uDCDC Loaded **" + commands.size() + "** commands!");
             this.commands = List.copyOf(commands);
         } catch (Exception e) {
             LOGGER.error("Could not load commands!", e);
