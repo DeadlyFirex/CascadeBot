@@ -39,17 +39,11 @@ public class PlaylistService {
     }
 
     @GraphQLQuery
-    @Nonnull
     public List<Playlist> allPlaylists(@GraphQLRootContext QLContext context, long ownerId, @Nonnull PlaylistScope scope) {
         Supplier<List<Playlist>> playlistSupplier = () -> PlaylistManager.getPlaylists(ownerId, scope).into(new ArrayList<>());
         if (scope == PlaylistScope.GUILD) {
-            return context.runIfAuthenticatedUser(user -> {
-                Guild guild = CascadeBot.INS.getShardManager().getGuildById(ownerId);
-                // If the guild exists and the authenticated user is a member of the guild then get the playlists
-                if (guild != null && guild.getMember(user) != null) {
-                    return playlistSupplier.get();
-                }
-                return null;
+            return context.runIfAuthenticatedGuild(ownerId, (guild, member) -> {
+                return playlistSupplier.get();
             });
         } else {
             return context.runIfAuthenticatedUser(user -> ownerId == user.getIdLong() ? playlistSupplier.get() : null);
