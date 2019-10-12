@@ -109,9 +109,10 @@ public class GuildDataService {
         return guild;
     }
 
-    @GraphQLMutation
+    @GraphQLMutation(description = "Sets the locale of the guild specified if the user has the correct permissions")
     public GuildData setGuildLocale(@GraphQLRootContext QLContext context, long guildId, @Nonnull Locale locale) {
         return context.runIfAuthenticatedGuild(guildId, (guild, member) -> {
+            // TODO: 12/10/2019 Add extra permission checks?
             GuildData guildData = context.getGuildData(guildId);
             guildData.setLocale(locale);
             return guildData;

@@ -34,7 +34,7 @@ public class PermissionsServices {
         return CascadeBot.INS.getPermissionsManager().getPermission(permission);
     }
 
-    @GraphQLMutation
+    @GraphQLMutation(description = "Checks whether the specified user has a permission in the guild. If the permission is incorrect or the user is not in the guild, this mutation throws an error.")
     public Result userHasPermission(@GraphQLRootContext QLContext context, long guildId, long userId, String permission) {
         return context.runIfAuthenticatedGuild(guildId, (guild, member) -> {
             GuildData guildData = context.getGuildData(guildId);

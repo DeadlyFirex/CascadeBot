@@ -17,7 +17,7 @@ public class CommandsService {
     @Getter
     private static CommandsService instance = new CommandsService();
 
-    @GraphQLQuery
+    @GraphQLQuery(description = "Retrieves a list of commands that belong to the specified module. If the module is null, all commands are returned.")
     @Nonnull
     public List<ICommandMain> allCommands(Module module) {
         if (module == null) {

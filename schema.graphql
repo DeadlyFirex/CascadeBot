@@ -1,5 +1,5 @@
-# source: http://localhost:8080/graphql
-# timestamp: Fri Oct 11 2019 16:21:09 GMT+0100 (British Summer Time)
+# source: http://localhost:8181/graphql
+# timestamp: Sat Oct 12 2019 13:13:37 GMT+0100 (British Summer Time)
 
 type CascadePermission {
   defaultPerm: Boolean!
@@ -22,10 +22,10 @@ type Group {
 }
 
 input GroupInput {
-  name: String
-  roleIds: [Long]
   id: String
   permissions: [String]
+  name: String
+  roleIds: [Long]
 }
 
 type GuildCommandInfo {
@@ -40,7 +40,7 @@ type GuildData {
   guildCommandInfos: [GuildCommandInfo]
   enabledFlags: [Flag]!
   creationTime: OffsetDateTime!
-  splashUrl: String!
+  splashUrl: String
   memberCount: Int!
   locale: Locale!
   ownerId: String
@@ -52,7 +52,7 @@ type GuildData {
   categoryCount: Int!
   voiceChannelCount: Int!
   name: String!
-  iconUrl: String!
+  iconUrl: String
   textChannelCount: Int!
 }
 
@@ -63,8 +63,8 @@ type GuildPermissions {
 }
 
 input GuildPermissionsInput {
-  groups: [GroupInput]
   users: Map_Long_UserScalar
+  groups: [GroupInput]
   mode: PermissionMode
 }
 
@@ -136,14 +136,22 @@ enum Module {
 
 """Mutation root"""
 type Mutation {
-  updateGuildPermissions(changes: GuildPermissionsInput!, guildId: Long!): GuildPermissions
+  """
+  Sets the locale of the guild specified if the user has the correct permissions
+  """
   setGuildLocale(locale: Locale!, guildId: Long!): GuildData
+  updateGuildPermissions(changes: GuildPermissionsInput!, guildId: Long!): GuildPermissions
 
   """Edits any fields on a playlist. Null fields are skipped."""
   editPlaylist(name: String, id: String!, ownerId: Long, playlistScope: PlaylistScope, tracks: [String]): Playlist
   deletePlaylist(id: String!): String
-  userHasPermission(permission: String, userId: Long!, guildId: Long!): Result
   setPrefix(prefix: String!, guildId: Long!): String
+
+  """
+  Checks whether the specified user has a permission in the guild. If the
+  permission is incorrect or the user is not in the guild, this mutation throws an error.
+  """
+  userHasPermission(permission: String, userId: Long!, guildId: Long!): Result
 
   """Disables all modules passed in."""
   disableModule(guildId: Long!, modules: [Module]!): [Module]
@@ -162,7 +170,8 @@ type Mutation {
 
   """
   Updates tags using the key-value object. If the tag doesn't exist, it is
-  created. This overwrites existing tags completely ignore past values.
+  created. If a name is empty, it is not added and silently ignored. This
+  overwrites existing tags completely ignore past values.
   """
   updateTags(guildId: Long!, tags: Map_String_TagScalar!): Map_String_TagScalar
 }
@@ -231,9 +240,19 @@ enum PlaylistScope {
 
 """Query root"""
 type Query {
-  allPlaylists(scope: PlaylistScope!, ownerId: Long!): [Playlist]!
+  """
+  Gets all playlists for the specified scope and owner id. If the current user
+  doesn't have permission to access the playlists or the ownerId is invalid, a
+  null value is returned.
+  """
+  allPlaylists(scope: PlaylistScope!, ownerId: Long!): [Playlist]
+
+  """
+  Returns the language file corresponding to the language key specified.
+  Optionally, a sub path can be passed in to retrieve a sub-section of the language file.
+  """
+  language(subPath: String, languageKey: String!): JSONObject
   permission(permission: String!): CascadePermission
-  language(languageKey: String!): JSONObject
 
   """
   Returns all the meta-data for settings including required Flags, modules and
@@ -242,7 +261,16 @@ type Query {
   """
   settingsInformation(settingsNames: [String]): [SettingsWrapper]
   guild(id: Long!): GuildData
+
+  """
+  Retrieves a playlist from its unique id. This checks that the user has
+  appropriate permissions for the scope (GUILD or USER)
+  """
   playlist(id: String!, guildId: Long!): Playlist
+
+  """
+  Retrieves a list of commands that belong to the specified module. If the module is null, all commands are returned.
+  """
   allCommands(module: Module): [ICommandMain]!
   allPermissions: [CascadePermission]
   userGuilds: [GuildData]

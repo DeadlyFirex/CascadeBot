@@ -26,7 +26,7 @@ public class PlaylistService {
     @Getter
     private static PlaylistService instance = new PlaylistService();
 
-    @GraphQLQuery
+    @GraphQLQuery(description = "Retrieves a playlist from its unique id. This checks that the user has appropriate permissions for the scope (GUILD or USER)")
     public Playlist playlist(@GraphQLRootContext QLContext context, long guildId, @Nonnull String id) {
         Playlist playlist = PlaylistManager.getPlaylistById(id);
         if (playlist == null) return null;
@@ -38,7 +38,7 @@ public class PlaylistService {
         }
     }
 
-    @GraphQLQuery
+    @GraphQLQuery(description = "Gets all playlists for the specified scope and owner id. If the current user doesn't have permission to access the playlists or the ownerId is invalid, a null value is returned.")
     public List<Playlist> allPlaylists(@GraphQLRootContext QLContext context, long ownerId, @Nonnull PlaylistScope scope) {
         Supplier<List<Playlist>> playlistSupplier = () -> PlaylistManager.getPlaylists(ownerId, scope).into(new ArrayList<>());
         if (scope == PlaylistScope.GUILD) {
