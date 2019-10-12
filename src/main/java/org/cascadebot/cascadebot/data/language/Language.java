@@ -13,6 +13,8 @@ import org.cascadebot.cascadebot.CascadeBot;
 import org.cascadebot.cascadebot.ShutdownHandler;
 import org.cascadebot.cascadebot.data.managers.GuildDataManager;
 import org.cascadebot.cascadebot.utils.FormatUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -20,6 +22,7 @@ import java.util.Map;
 
 public class Language {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Language.class);
     private static final Language INSTANCE = new Language();
 
     private Map<Locale, JSONConfig> languages = new HashMap<>();
@@ -28,20 +31,20 @@ public class Language {
         try {
             loadLanguage(Locale.ENGLISH_UK);
         } catch (Exception e) {
-            CascadeBot.LOGGER.error("Could not load language!", e);
+            LOGGER.error("Could not load language!", e);
             ShutdownHandler.exitWithError();
         }
-        CascadeBot.LOGGER.info("Loaded {} languages!", languages.size());
+        LOGGER.info("Loaded {} languages!", languages.size());
     }
 
     private void loadLanguage(Locale locale) {
         InputStream stream = locale.getLanguageFile();
         if (stream == null) {
             if (locale == Locale.getDefaultLocale()) {
-                CascadeBot.LOGGER.error("I couldn't load the default language file {} from the JAR file, stopping the bot!", locale.getLanguageFileName());
+                LOGGER.error("I couldn't load the default language file {} from the JAR file, stopping the bot!", locale.getLanguageFileName());
                 ShutdownHandler.exitWithError();
             } else {
-                CascadeBot.LOGGER.warn("I couldn't load the language file {} from the JAR file!", locale.getLanguageFileName());
+                LOGGER.warn("I couldn't load the language file {} from the JAR file!", locale.getLanguageFileName());
             }
         } else {
             JSONConfig config = new JSONConfig(stream);
@@ -71,7 +74,7 @@ public class Language {
                 message = FormatUtils.formatPrefix(GuildDataManager.getGuildData(guildId).getCoreSettings().getPrefix(), message);
                 return FormatUtils.formatUnicode(message);
             } else {
-                CascadeBot.LOGGER.warn("Cannot find a language string matching the path '{}'", path);
+                LOGGER.warn("Cannot find a language string matching the path '{}'", path);
                 return INSTANCE.languages.get(Locale.getDefaultLocale()).getString(path).isPresent() ? i18n(Locale.getDefaultLocale(), path, args) : "No language string for " + path;
             }
         } else {
@@ -91,7 +94,7 @@ public class Language {
                 MessageFormat format = new MessageFormat(INSTANCE.languages.get(locale).getString(path).get(), locale.getULocale());
                 return FormatUtils.formatUnicode(format.format(args));
             } else {
-                CascadeBot.LOGGER.warn("Cannot find a language string matching the path '{}'", path);
+                LOGGER.warn("Cannot find a language string matching the path '{}'", path);
                 return INSTANCE.languages.get(Locale.getDefaultLocale()).getString(path).isPresent() ? i18n(Locale.getDefaultLocale(), path, args) : "No language string for " + path;
             }
         } else {
